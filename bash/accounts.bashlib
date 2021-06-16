@@ -1,0 +1,63 @@
+###########################
+getAllADAccounts() {
+  local authTkn=$1; shift
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Accounts                    \
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getADAccountById() {
+  local authTkn=$1; shift
+  local accountId=$1; shift
+  if [[ "$accountId" == "" ]]; then
+    echo "getAccountById: Account ID cannot be empty."
+    return
+  fi
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Accounts/$accountId		\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getADAccountsForUserById() {
+  local authTkn=$1; shift
+  local uId=$1; shift
+  if [[ "$uId" == "" ]]; then
+    echo "getAccountsForUserByName: User name cannot be empty."
+    return
+  fi
+  getAllAccounts $authTkn | jq -r ".Resources[] | select(.identity.value==\"$uId\")"
+}
+
+###########################
+# Not fully implemented
+createADAccount() {
+  local authTkn=$1; shift
+  local uId=$1; shift
+  local appId=$1; shift
+  $CURL --request POST					\
+        --url $SCIM_URL/Accounts			\
+	--header "Content-Type: application/scim+json"	\
+        --header "Authorization: Bearer $authTkn"	\
+	--data {					\
+		"identity": {				\
+			"value": "$uId"			\
+		},					\
+		"application": {			\
+			"value": "$appId",		\
+		},					\
+		"nativeIdentity": "",			\
+		"displayName": "James.Smith",		\
+		"urn:ietf:params:scim:schemas:sailpoint:1.0:Application:Schema:2c9091cb5512cd85015512ce25240006": {	\
+			"sn": "Smith3",											\
+			"cn": "James3 Smith3",										\
+			"department": "Accounting",									\
+			"sAMAccountName": "James.Smith",								\
+			"givenName": "James3",										\
+			"distinguishedName": ""										\
+		}													\
+	}
+}

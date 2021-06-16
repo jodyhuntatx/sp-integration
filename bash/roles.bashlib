@@ -1,0 +1,22 @@
+###########################
+getAllRoles() {
+  local authTkn=$1; shift
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Roles			\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getRole() {
+  local authTkn=$1; shift
+  local rId=$1; shift
+  if [[ "$rId" == "" ]]; then
+    echo "getRole: Role ID cannot be empty."
+    return
+  fi
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Roles/$rId          	\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}

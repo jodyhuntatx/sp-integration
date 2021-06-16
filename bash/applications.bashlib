@@ -1,0 +1,23 @@
+###########################
+getAllApplications() {
+  local authTkn=$1; shift
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Applications                    \
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
+
+###########################
+# This executes at the server and is much faster than getUserByName.
+getApplicationById() {
+  local authTkn=$1; shift
+  local appId=$1; shift
+  if [[ "$appId" == "" ]]; then
+    echo "getApplicationById: Application ID cannot be empty."
+    return
+  fi
+  $CURL --request GET                                   \
+        --url $SCIM_URL/Applications/$appId             \
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}

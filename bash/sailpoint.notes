@@ -1,0 +1,25 @@
+Types:
+- ADAccount
+  - User
+    - Role
+      - Entitlement
+        - Application
+
+- Workflow
+  - TaskResult
+
+- PolicyViolation
+
+Native system == target system
+Native identity == login identity in target system
+Role == Role
+Entitlement == Permission
+
+Provisioning requests create a provisioning plan that the Provision Broker can analyze and process. In all cases, except certification and policy violation-generated requests, provisioning requests create a Workflow case. The Workflow case manages the processing of the provisioning request based on a defined Workflow.
+
+ - https://community.sailpoint.com/t5/Technical-White-Papers/BeanShell-Developer-s-Guide-for-IdentityIQ/ta-p/74365
+ - https://community.sailpoint.com/t5/Plugin-Documents/Plugin-Developer-Guide-Overview/td-p/77478
+ - https://community.sailpoint.com/t5/IdentityIQ-Wiki/IdentityIQ-7-3-Robotic-Process-Automation-RPA-Bot-Governance/ta-p/79454
+
+ - support.idplusa@sailpoint.com
+

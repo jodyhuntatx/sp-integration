@@ -1,0 +1,35 @@
+###########################
+getAllEntitlements() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/Entitlements			\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+# May return more than one record.
+getEntitlementsByDisplayName() {
+  local authTkn=$1; shift
+  local dName=$1; shift
+  if [[ "$dName" == "" ]]; then
+    echo "getEntitlementByDisplayName: Entitlement display name cannot be empty."
+    return
+  fi
+  getAllEntitlements $authTkn | jq -r ".Resources[] | select(.application.displayName==\"$dName\")"
+}
+
+###########################
+# This executes at the server and is much faster than getEntitlementByDisplayName.
+getEntitlementById() {
+  local authTkn=$1; shift
+  local eId=$1; shift
+  if [[ "$eId" == "" ]]; then
+    echo "getEntitlement: Entitlement ID cannot be empty."
+    return
+  fi
+  $CURL --request GET					\
+	--url $SCIM_URL/Entitlements/$eId		\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}

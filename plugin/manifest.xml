@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin certificationLevel="None" displayName="CyberArk Plugin" minSystemVersion="7.1" name="CyberArkPlugin" version="0.1">
+    <Attributes>
+        <Map>
+            <entry key="minUpgradableVersion" value="0.1" />
+            <entry key="fullPage">
+                <value>
+                    <FullPage title="CyberArk" />
+                </value>
+            </entry>
+            <entry key="restResources">
+                <value>
+                    <List>
+                        <String>com.cyberark.login</String>
+                        <String>com.cyberark.safes</String>
+                        <String>com.cyberark.accounts</String>
+                    </List>
+                </value>
+            </entry>
+        </Map>
+    </Attributes>
+</Plugin>

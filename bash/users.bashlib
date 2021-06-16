@@ -1,0 +1,141 @@
+# Does not require authentication:
+#  getConfig | jq .
+#
+# Requires authentication:
+#  getAuthToken $clientId $Secret (values from SP UI)
+#  getSchemas $ACCESS_TOKEN | jq .
+#  getResourceTypes $ACCESS_TOKEN | jq .
+#
+# User Management:
+#  getAllUsers $ACCESS_TOKEN | jq .
+#  createUser $ACCESS_TOKEN $FName $LName
+#  getUserByName $ACCESS_TOKEN $FName.$LName
+#  getUserById $ACCESS_TOKEN $userId | jq .
+#  deleteUserById $ACCESS_TOKEN $userId
+#  getUserRolesEntitlementsById $ACCESS_TOKEN $userId | jq .
+
+###########################
+getConfig() {
+  $CURL --request GET					\
+	--url $SCIM_URL/ServiceProviderConfig
+}
+
+###########################
+getAuthToken() {
+  local cid=$1; shift
+  local xxx=$1; shift
+  $CURL --request POST					\
+	--url $BASE_URL/oauth2/token			\
+	--header 'Accept: */*'				\
+	--user $cid:$xxx				\
+	--data grant_type=client_credentials
+}
+
+###########################
+getSchemas() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/Schemas				\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getResourceTypes() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/ResourceTypes			\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getAllUsers() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/Users				\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+createUser() {
+  local authTkn=$1; shift
+  local first=$1; shift
+  local last=$1; shift
+
+  uName=$(echo $first.$last)
+  pwd=$(openssl rand -hex 12)
+  $CURL -X POST							\
+	--url $SCIM_URL/Users					\
+	--header "Content-Type: application/scim+json"		\
+  	--header "Authorization: Bearer $authTkn"		\
+	--data "{						\
+		\"userName\": \"$uName\",			\
+		\"name\": {					\
+			\"familyName\":\"$last\",		\
+			\"givenName\":\"$first\",		\
+			\"displayName\":\"$first $last\"	\
+		},						\
+		\"active\": true,				\
+		\"password\": \"$pwd\",				\
+		\"capabilities\": \"SystemAdministrator\"	\
+	}"
+}
+
+###########################
+getUserByName() {
+  local authTkn=$1; shift
+  local uName=$1; shift
+  if [[ "$uName" == "" ]]; then
+    echo "getUserByName: User name cannot be empty."
+    return
+  fi
+  getAllUsers $authTkn | jq -r ".Resources[] | select(.userName==\"$uName\")"
+}
+
+###########################
+# This executes at the server and is much faster than getUserByName.
+getUserById() {
+  local authTkn=$1; shift
+  local uId=$1; shift
+  if [[ "$uId" == "" ]]; then
+    echo "getUser: User ID cannot be empty."
+    return
+  fi
+  $CURL --request GET					\
+	--url $SCIM_URL/Users/$uId			\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+deleteUserById() {
+  local authTkn=$1; shift
+  local uId=$1; shift
+  if [[ "$uId" == "" ]]; then
+    echo "deleteUser: User ID cannot be empty."
+    return
+  fi
+  $CURL --request DELETE				\
+	--url $SCIM_URL/Users/$uId			\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getUserRolesEntitlementsById() {
+  local authTkn=$1; shift
+  local uId=$1; shift
+  if [[ "$uId" == "" ]]; then
+    echo "getUserRolesEntitlements: User ID cannot be empty."
+    return
+  fi
+  $CURL --request GET					\
+	--url $SCIM_URL/Users/$uId?attributes=userName,					\
+		urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:manager,	\
+		urn:ietf:params:scim:schemas:sailpoint:1.0:User:entitlements,		\
+		urn:ietf:params:scim:schemas:sailpoint:1.0:User:roles			\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}

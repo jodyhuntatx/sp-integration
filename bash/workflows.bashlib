@@ -1,0 +1,71 @@
+###########################
+getAllWorkflows() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/Workflows				\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getAllLaunchedWorkflows() {
+  local authTkn=$1; shift
+  $CURL --request GET					\
+	--url $SCIM_URL/LaunchedWorkflows		\
+	--header 'Accept: */*'				\
+  	--header "Authorization: Bearer $authTkn"
+}
+
+###########################
+launchWorkflow() {
+  local authTkn=$1; shift
+  $CURL -X POST							\
+	--url $SCIM_URL/LaunchWorkflows				\
+	--header "Content-Type: application/scim+json"		\
+  	--header "Authorization: Bearer $authTkn"		\
+	--data {												\
+			"schemas": [										\
+				"urn:ietf:params:scim:schemas:sailpoint:1.0:LaunchedWorkflow",			\
+				"urn:ietf:params:scim:schemas:sailpoint:1.0:TaskResult"				\
+			],											\
+			"urn:ietf:params:scim:schemas:sailpoint:1.0:LaunchedWorkflow": {			\
+				"workflowName": "LCM Manage Passwords",						\
+				"input": [									\
+					{									\
+						"key": "plan",							\
+						"value": "<ProvisioningPlan nativeIdentity=\"Ernest.Wagner\" targetIntegration=\"ADDirectDemodata\"> application=\"ADDirectDemodata\" nativeIdentity=\"<AccountRequest>\" \"type\": \"application\/xml\""			\
+					},									\
+					{									\
+						"key": "targetName",						\
+						"value": "Ernest.Wagner"					\
+					},									\
+					{									\
+						"key": "targetClass",						\
+						"value": "Identity"						\
+					},									\
+					{									\
+						"key": "identityName",						\
+						"value": "Ernest.Wagner"					\
+					},									\
+					{									\
+						"key": "flow",							\
+						"value": "PasswordRequest"					\
+					}									\
+				]										\
+			}											\
+	}
+}
+
+###########################
+getWorkflowStatus() {
+  local authTkn=$1; shift
+  local wId=$1; shift
+  if [[ "$wId" == "" ]]; then
+    echo "getWorkflowStatus: Workflow ID cannot be empty."
+    return
+  fi
+  $CURL --request GET                                   \
+        --url $SCIM_URL/LaunchedWorkflows/$wId		\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}

@@ -1,0 +1,22 @@
+###########################
+getAllTaskResults() {
+  local authTkn=$1; shift
+  $CURL --request GET                                   \
+        --url $SCIM_URL/TaskResults			\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
+
+###########################
+getTaskResult() {
+  local authTkn=$1; shift
+  local tId=$1; shift
+  if [[ "$tId" == "" ]]; then
+    echo "getTaskResult: Task ID cannot be empty."
+    return
+  fi
+  $CURL --request GET                                   \
+        --url $SCIM_URL/TaskResults/$tId          	\
+        --header 'Accept: */*'                          \
+        --header "Authorization: Bearer $authTkn"
+}
